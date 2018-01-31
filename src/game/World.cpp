@@ -1011,6 +1011,13 @@ void World::LoadConfigSettings(bool reload)
     m_configs[CONFIG_PVP_TOKEN_MAP_TYPE] = sConfig.GetIntDefault("PvPToken.MapAllowType", 4);
     m_configs[CONFIG_PVP_TOKEN_ID] = sConfig.GetIntDefault("PvPToken.ItemID", 29434);
     m_configs[CONFIG_PVP_TOKEN_COUNT] = sConfig.GetIntDefault("PvPToken.ItemCount", 1);
+	m_configs[CONFIG_TRANS_GOLD] = sConfig.GetIntDefault("Transmogrification.Gold", 0);
+	m_configs[CONFIG_TRANS_HONOR] = sConfig.GetIntDefault("Transmogrification.Honor", 0);
+	m_configs[CONFIG_TRANS_AP] = sConfig.GetIntDefault("Transmogrification.ArenaPoints", 0);
+	m_configs[CONFIG_TRANS_RATING] = sConfig.GetIntDefault("Transmogrification.Rating", 0);
+	m_configs[CONFIG_TRANS_ITEM] = sConfig.GetIntDefault("Transmogrification.Item", 0);
+	m_configs[CONFIG_TRANS_ITEMCOUNT] = sConfig.GetIntDefault("Transmogrification.ItemCount", 0);
+	m_configs[CONFIG_SPECTATOR_SEE_INVIS] = sConfig.GetBoolDefault("Spectator.CanSeeInvis", 0);
     m_configs[CONFIG_NO_RESET_TALENT_COST] = sConfig.GetBoolDefault("NoResetTalentsCost", false);
     m_configs[CONFIG_SHOW_KICK_IN_WORLD] = sConfig.GetBoolDefault("ShowKickInWorld", false);
     m_configs[CONFIG_INTERVAL_LOG_UPDATE] = sConfig.GetIntDefault("RecordUpdateTimeDiffInterval", 60000);
@@ -1308,6 +1315,9 @@ void World::SetInitialWorldSettings()
 
     sConsole.SetLoadingLabel("Loading Item Texts...");
     sObjectMgr.LoadItemTexts();
+	
+    sLog.outString("Loading Transmogrifications...");           // custom must be after LoadItemTemplates
+    sObjectMgr.LoadTransmogrifications();
 
     sConsole.SetLoadingLabel("Loading Creature Model Based Info Data...");
     sObjectMgr.LoadCreatureModelInfo();

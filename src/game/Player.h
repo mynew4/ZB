@@ -82,6 +82,11 @@ enum BuyBankSlotResult
     ERR_BANKSLOT_OK                 = 3
 };
 
+enum TransmogrificationResult // custom
+{
+	ERR_FAKE_OK
+};
+
 enum PlayerSpellState
 {
     PLAYERSPELL_UNCHANGED = 0,
@@ -1039,6 +1044,9 @@ class Player : public Unit, public GridObject<Player>
             if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH;
             else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH;
         }
+		
+		bool isSpectator() const  { return spectatorFlag; }
+		void SetSpectator(bool on);
 
         void GiveXP(uint32 xp, Unit* victim, bool disableRafBonus = false);
         void GiveLevel(uint32 level, bool ignoreRAF = false);
@@ -2667,6 +2675,8 @@ class Player : public Unit, public GridObject<Player>
             return HasTitle(title->bit_index);
         }
         void SetTitle(CharTitlesEntry const* title, bool lost = false);
+		
+		uint32 SuitableForTransmogrification(Item* oldItem, Item* newItem); // custom
 
         bool IsLoading() const;
 
@@ -2901,6 +2911,8 @@ class Player : public Unit, public GridObject<Player>
         float  m_summon_z;
 
         DeclinedName* m_declinedname;
+		
+		bool spectatorFlag;
 
         bool CanAlwaysSee(WorldObject const* obj) const override;
 

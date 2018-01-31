@@ -629,6 +629,7 @@ class ObjectMgr
         {
             return sCreatureInfoAddonStorage.LookupEntry<CreatureDataAddon>(entry);
         }
+		
 
         static ItemTemplate const* GetItemTemplate(uint32 id)
         {
@@ -828,6 +829,7 @@ class ObjectMgr
         void LoadGameobjectRespawnTimes();
         void LoadItemTemplates();
         void LoadItemLocales();
+		void LoadTransmogrifications(); //custom
         void LoadQuestLocales();
         void LoadNpcTextLocales();
         void LoadPageTextLocales();
@@ -1153,6 +1155,8 @@ class ObjectMgr
             if (data.size() > size_t(loc_idx) && !data[loc_idx].empty())
                 value = data[loc_idx];
         }
+		
+		ItemFakeEntryContainer _itemFakeEntryStore; // custom
 
     protected:
 

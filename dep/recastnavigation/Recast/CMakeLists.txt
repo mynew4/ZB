@@ -10,7 +10,8 @@
 
 set(Recast_STAT_SRCS
     Recast.cpp 
-    RecastAlloc.cpp 
+    RecastAlloc.cpp
+    RecastAssert.cpp	
     RecastArea.cpp 
     RecastContour.cpp 
     RecastFilter.cpp 

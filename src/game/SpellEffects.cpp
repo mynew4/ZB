@@ -5308,6 +5308,8 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 {
                     if (!unitTarget)
                         return;
+					
+					//разрешить в комбате
 
                     // Prevent stacking of mounts
                     unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);

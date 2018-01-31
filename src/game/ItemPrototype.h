@@ -627,6 +627,8 @@ struct ItemTemplate
     }
 };
 
+typedef UNORDERED_MAP<uint32, uint32> ItemFakeEntryContainer; // custom
+
 struct ItemLocale
 {
     std::vector<std::string> Name;

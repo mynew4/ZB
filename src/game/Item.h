@@ -371,6 +371,13 @@ class Item : public Object
         }
 
         void BuildUpdate(UpdateDataMapType&) override;
+		
+		// custom
+        uint32 GetFakeEntry();
+        bool DeleteFakeEntry();
+        static void DeleteFakeFromDB(uint32 lowGUID);
+        void SetFakeEntry(uint32 entry);
+        bool HasGoodFakeQuality();
 
     private:
         uint8 m_slot;

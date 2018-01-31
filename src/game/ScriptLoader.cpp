@@ -19,6 +19,11 @@
 
 #ifdef SCRIPTS
 
+//Custom
+void AddSC_npc_exchanger();
+void AddSC_npc_arena_spectator();
+void AddSC_npc_transmogrification();
+
 //examples
 //void AddSC_custom_example();
 //void AddSC_custom_gossip_codebox();
@@ -392,6 +397,12 @@ void AddSC_onevents();
 void AddScripts()
 {
     #ifdef SCRIPTS
+	
+	 //Custom
+	AddSC_npc_exchanger();
+	AddSC_npc_arena_spectator();
+	AddSC_npc_transmogrification();
+
     //    AddSC_custom_example();
     //    AddSC_custom_gossip_codebox();
     //    AddSC_test();

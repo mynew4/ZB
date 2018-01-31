@@ -267,6 +267,8 @@ Player::Player(WorldSession* session) : Unit(true), m_reputationMgr(this)
     m_divider = 0;
 
     m_ExtraFlags = 0;
+	
+	spectatorFlag = false;
 
     // players always accept
     if (GetSession()->GetSecurity() == SEC_PLAYER)
@@ -2276,6 +2278,68 @@ void Player::SetInWater(bool apply)
     getHostileRefManager().updateThreatTables();
 }
 
+void Player::SetSpectator(bool on)
+{
+	if (on)
+	{
+		CombatStop();
+		SetSpeed(MOVE_RUN, 2.0);
+
+		spectatorFlag = true;
+
+		RemoveArenaAuras();
+		RemoveAllEnchantments(TEMP_ENCHANTMENT_SLOT, true);
+
+		//m_ExtraFlags |= PLAYER_EXTRA_GM_ON;
+		SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+		m_ExtraFlags |= PLAYER_EXTRA_GM_INVISIBLE; 
+		setFaction(35);
+		SetFFAPvP(false);
+
+		RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+		RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
+		Pet* pet = GetPet();
+		if (pet)
+		{
+			if (pet->getPetType() == SUMMON_PET || pet->getPetType() == HUNTER_PET)
+			{
+				SetTemporaryUnsummonedPetNumber(pet->GetCharmInfo()->GetPetNumber());
+				SetOldPetSpell(pet->GetUInt32Value(UNIT_CREATED_BY_SPELL));
+			}
+			RemovePet(NULL,PET_SAVE_NOT_IN_SLOT);
+		}
+		else
+			SetTemporaryUnsummonedPetNumber(0);
+
+		ResetContestedPvP();
+
+		getHostileRefManager().setOnlineOfflineState(false);
+		CombatStopWithPets();
+
+		uint32 morphs[8] = {25900, 736, 20582};
+		SetDisplayId(morphs[urand(0, 2)]);
+	}
+    else
+    {
+		UpdateSpeed(MOVE_RUN, true);
+		spectatorFlag = false;
+		//m_ExtraFlags &= ~ PLAYER_EXTRA_GM_ON;
+		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+		m_ExtraFlags &= ~PLAYER_EXTRA_GM_INVISIBLE;
+        setFactionForRace(getRace());
+
+        // restore FFA PvP Server state
+        if (sWorld.IsFFAPvPRealm())
+            SetFFAPvP(true);
+
+        getHostileRefManager().setOnlineOfflineState(true);
+        DeMorph();
+    }
+    UpdateObjectVisibility();
+
+
+}
+
 bool Player::IsInAreaTriggerRadius(const AreaTriggerEntry* trigger) const
 {
     if (!trigger || GetMapId() != trigger->mapid)
@@ -2359,6 +2423,7 @@ void Player::SetGMVisible(bool on)
 
         SetAcceptWhispers(false);
         SetGameMaster(true);
+		
 
         m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GM, GetSession()->GetSecurity());
     }
@@ -10555,8 +10620,20 @@ void Player::SetVisibleItemSlot(uint8 slot, Item* pItem)
     {
         SetUInt64Value(PLAYER_VISIBLE_ITEM_1_CREATOR + (slot * MAX_VISIBLE_ITEM_OFFSET), pItem->GetUInt64Value(ITEM_FIELD_CREATOR));
 
-        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * MAX_VISIBLE_ITEM_OFFSET);
-        SetUInt32Value(VisibleBase + 0, pItem->GetEntry());
+       // int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * MAX_VISIBLE_ITEM_OFFSET);
+	   // custom
+        /*if (pItem->GetFakeEntry())
+            SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + (slot * 2), pItem->GetFakeEntry());
+        else*/
+		int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * MAX_VISIBLE_ITEM_OFFSET);
+		if (pItem->GetFakeEntry())
+		{
+			SetUInt32Value(VisibleBase + 0, pItem->GetFakeEntry());
+		}
+		else
+		{
+			SetUInt32Value(VisibleBase + 0, pItem->GetEntry());
+		}
 
         for (int i = 0; i < MAX_INSPECTED_ENCHANTMENT_SLOT; ++i)
             SetUInt32Value(VisibleBase + 1 + i, pItem->GetEnchantmentId(EnchantmentSlot(i)));
@@ -10680,6 +10757,7 @@ void Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update)
 {
     if (Item* it = GetItemByPos(bag, slot))
     {
+		it->DeleteFakeFromDB(it->GetGUIDLow()); // custom
         ItemRemovedQuestCheck(it->GetEntry(), it->GetCount());
         RemoveItem(bag, slot, update);
         it->RemoveFromUpdateQueueOf(this);
@@ -11829,6 +11907,9 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
 
     if (slot >= MAX_ENCHANTMENT_SLOT)
         return;
+	
+	if (HasAuraType(SPELL_AURA_MOD_DISARM)) 
+        return; 
 
     uint32 enchant_id = item->GetEnchantmentId(slot);
     if (!enchant_id)
@@ -20668,6 +20749,10 @@ void Player::SetMap(Map* map)
 {
     Unit::SetMap(map);
     m_mapRef.link(map, this);
+}
+
+uint32 Player::SuitableForTransmogrification(Item* oldItem, Item* newItem) // custom
+{return ERR_FAKE_OK;
 }
 
 bool Player::IsLoading() const

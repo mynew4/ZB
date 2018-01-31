@@ -1188,7 +1188,8 @@ void Battleground::AddPlayer(Player* plr)
     WorldPacket data;
     sBattlegroundMgr.BuildPlayerJoinedBattlegroundPacket(&data, plr);
     SendPacketToTeam(team, &data, plr, false);
-
+	
+	plr->SetSpectator(false);
     plr->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
     plr->CombatStop();
     plr->getHostileRefManager().deleteReferences();
@@ -1256,6 +1257,11 @@ void Battleground::EventPlayerLoggedOut(Player* player)
 
     if (isArena())
         player->LeaveBattleground();
+	
+	if (player->isSpectator())
+		{
+			player->SetSpectator(false);
+		}
 }
 
 /* This method should be called only once ... it adds pointer to queue */
